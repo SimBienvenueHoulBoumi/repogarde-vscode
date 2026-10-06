@@ -18,11 +18,14 @@ updates:
     schedule:
       interval: weekly
     commit-message:
+      # Sans scope : titres de PR courts (72 caractères max, vérifiés en CI)
       prefix: build
-      include: scope
     groups:
       npm:
         patterns: ["*"]
     ignore:
       # Fixé sur la version minimale de VS Code supportée (engines.vscode)
       - dependency-name: "@types/vscode"
+      # Types de la version de Node embarquée par VS Code, pas de la dernière
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
