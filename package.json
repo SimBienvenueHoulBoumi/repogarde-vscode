@@ -2,7 +2,7 @@
   "name": "repogarde",
   "displayName": "repogarde",
   "description": "Commits conventionnels guidés, nommage des branches et hooks repogarde dans VS Code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "repogarde",
   "license": "MIT",
   "repository": {

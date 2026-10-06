@@ -53,6 +53,25 @@ jobs:
           GH_REPO: ${{ github.repository }} # pas de checkout : dépôt explicite pour gh
           PR_JSON: ${{ steps.release.outputs.pr }}
         run: |
+          # Erreurs 5xx passagères de l'API GitHub : nouvelles tentatives espacées
+          reessayer() {
+            for i in 1 2 3 4 5; do
+              "$@" && return 0
+              echo "↻ échec ($i/5) : $*"
+              sleep $((i * 15))
+            done
+            return 1
+          }
+          # Runs « pull_request » de la PR de release mis en attente d'approbation
+          # (GitHub traite le bot comme un contributeur externe) : approuvés,
+          # uniquement pour le commit exact de la branche de release
+          approuver_runs() {
+            gh api "repos/$GH_REPO/actions/runs?status=action_required&head_sha=$sha" \
+              --jq '.workflow_runs[].id' | while IFS= read -r id; do
+                gh api -X POST "repos/$GH_REPO/actions/runs/$id/approve" >/dev/null &&
+                  echo "✔ run $id approuvé"
+              done || true
+          }
           if [ -n "$PR_JSON" ]; then
             pr="$(jq -r .number <<<"$PR_JSON")"
           else
@@ -72,9 +91,9 @@ jobs:
               sleep 5
             done
             echo "PR #$pr ($branch @ ${sha:0:7}) : lancement de la CI (tentative $tentative)"
-            gh workflow run ci.yml --ref "$branch"
+            reessayer gh workflow run ci.yml --ref "$branch"
             # CodeQL aussi : chaque commit de main doit être analysé
-            gh workflow run codeql.yml --ref "$branch"
+            reessayer gh workflow run codeql.yml --ref "$branch"
             run_id=""
             for _ in $(seq 1 30); do
               run_id="$(gh run list --workflow ci.yml --branch "$branch" --event workflow_dispatch \
@@ -107,18 +126,21 @@ jobs:
               state="$(gh pr view "$pr" --json mergeStateStatus -q .mergeStateStatus)"
               case "$state" in
                 CLEAN | BEHIND) break ;;
-                BLOCKED | UNKNOWN | UNSTABLE) sleep 30 ;;
+                BLOCKED | UNKNOWN | UNSTABLE)
+                  approuver_runs
+                  sleep 30
+                  ;;
                 *) echo "✖ PR #$pr non mergeable : $state"; exit 1 ;;
               esac
             done
             if [ "$state" = BEHIND ]; then
               echo "↻ main a avancé pendant la CI : mise à jour de la PR #$pr"
-              gh pr update-branch "$pr"
+              reessayer gh pr update-branch "$pr"
               sleep 10
               continue
             fi
             [ "$state" = CLEAN ] || { echo "✖ PR #$pr toujours $state après 45 min"; exit 1; }
-            gh pr merge "$pr" --squash --match-head-commit "$sha"
+            reessayer gh pr merge "$pr" --squash --match-head-commit "$sha"
             echo "merged=true" >>"$GITHUB_OUTPUT"
             exit 0
           done

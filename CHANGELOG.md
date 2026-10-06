@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/SimBienvenueHoulBoumi/repogarde-vscode/compare/v0.1.0...v0.1.1) (2026-10-06)
+
+
+### Documentation
+
+* README complet ([#7](https://github.com/SimBienvenueHoulBoumi/repogarde-vscode/issues/7)) ([b8280aa](https://github.com/SimBienvenueHoulBoumi/repogarde-vscode/commit/b8280aa0566bf5536dff969b68daded0a814898e))
+
 ## 0.1.0 (2026-10-06)
 
 
