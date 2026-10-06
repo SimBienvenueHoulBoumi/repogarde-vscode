@@ -1,0 +1,82 @@
+{
+  "name": "repogarde",
+  "displayName": "repogarde",
+  "description": "Commits conventionnels guidés, nommage des branches et hooks repogarde dans VS Code",
+  "version": "0.0.0",
+  "publisher": "repogarde",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SimBienvenueHoulBoumi/repogarde-vscode"
+  },
+  "bugs": "https://github.com/SimBienvenueHoulBoumi/repogarde-vscode/issues",
+  "homepage": "https://simbienvenuehoulboumi.github.io/repogarde/",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "conventional commits",
+    "hooks",
+    "commit",
+    "branch"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "repogarde.commit",
+        "title": "Rédiger un commit conventionnel",
+        "category": "repogarde",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "repogarde.renommerBranche",
+        "title": "Renommer la branche selon la convention",
+        "category": "repogarde"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "repogarde.commit",
+          "when": "scmProvider == git",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configurationDefaults": {
+      "git.inputValidation": true,
+      "git.inputValidationSubjectLength": 72
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "vscode:prepublish": "npm run build -- --production",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vscode-test",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.0",
+    "@types/vscode": "1.100.0",
+    "@vscode/test-cli": "0.0.15",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
+    "esbuild": "0.28.2",
+    "ovsx": "1.2.0",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}

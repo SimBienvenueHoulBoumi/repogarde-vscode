@@ -1,0 +1,5 @@
+# Hooks du projet : repogarde lui-même (version figée)
+remotes:
+  - git_url: https://github.com/SimBienvenueHoulBoumi/repogarde
+    ref: v2.1.2
+    configs: [lefthook-remote.yml]

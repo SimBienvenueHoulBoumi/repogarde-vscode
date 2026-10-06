@@ -1,0 +1,28 @@
+# Mises à jour des actions (figées par SHA) et des dépendances npm ; messages
+# Conventional Commits pour passer la vérification repogarde.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build
+      include: scope
+    groups:
+      npm:
+        patterns: ["*"]
+    ignore:
+      # Fixé sur la version minimale de VS Code supportée (engines.vscode)
+      - dependency-name: "@types/vscode"
