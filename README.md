@@ -43,7 +43,7 @@ npm run build && npm run test:integration   # dans un vrai VS Code
 npx vsce package --no-dependencies          # paquet .vsix
 ```
 
-Versions et publication sont automatiques : les commits conventionnels sur `main` alimentent une PR de release, mergée par la CI, puis le `.vsix` est attesté, joint à la release et publié (Marketplace, Open VSX). Configuration unique de la publication : `scripts/configurer-publication.sh`.
+Versions et releases sont automatiques ([workflow réutilisable de repogarde](https://simbienvenuehoulboumi.github.io/repogarde/releases/)) : les commits conventionnels sur `main` alimentent une PR de release, validée par la CI puis mergée, et le `.vsix` est attesté et joint à la release. La **publication** (Marketplace, Open VSX) attend l'approbation de l'environnement `production`, dont les secrets ne sont lisibles qu'après cette approbation. Configuration unique : `scripts/configurer-publication.sh`.
 
 ## Licence
 
