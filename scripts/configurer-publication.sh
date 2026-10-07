@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Configure la publication de l'extension sur le Marketplace VS Code et Open VSX.
 # Ouvre chaque page au bon moment, attend ta validation, demande chaque jeton
-# en saisie masquée, le vérifie, puis l'enregistre comme secret GitHub.
+# en saisie masquée, le vérifie, puis l'enregistre comme secret de
+# l'environnement « production » : lisible seulement par un job approuvé.
 # Aucun jeton n'est affiché, écrit dans un fichier ou passé en argument.
 #
 #   bash scripts/configurer-publication.sh
@@ -48,6 +49,12 @@ if ! gh repo view "$REPO" >/dev/null 2>&1; then
         --description "Extension VS Code pour repogarde : assistant de commit, branches, hooks" >/dev/null
 fi
 ok "gh connecté, dépôt $REPO accessible"
+# Environnement de publication (approbation : repogarde/bin/proteger --environnement production)
+if ! gh api "repos/$REPO/environments/production" --silent 2>/dev/null; then
+    gh api -X PUT "repos/$REPO/environments/production" --silent
+    echo "  Environnement « production » créé sans approbation : la poser avec"
+    echo "  repogarde/bin/proteger --repo $REPO --environnement production"
+fi
 
 bold "1. Identifiant d'éditeur"
 echo "  Il apparaîtra dans le nom de l'extension (<id>.repogarde) et ne pourra plus changer."
@@ -80,7 +87,7 @@ while :; do
     fi
     ko "Jeton refusé (organisation « All accessible organizations » et scope Marketplace Manage ?). Réessaie."
 done
-printf '%s' "$JETON" | gh secret set VSCE_PAT --repo "$REPO"
+printf '%s' "$JETON" | gh secret set VSCE_PAT --repo "$REPO" --env production
 JETON=""
 ok "Secret VSCE_PAT enregistré"
 
@@ -111,7 +118,7 @@ else
         exit 1
     fi
 fi
-printf '%s' "$JETON" | gh secret set OVSX_PAT --repo "$REPO"
+printf '%s' "$JETON" | gh secret set OVSX_PAT --repo "$REPO" --env production
 JETON=""
 ok "Secret OVSX_PAT enregistré"
 
@@ -122,4 +129,4 @@ ok "Variable PUBLISHER = $EDITEUR"
 
 bold "Terminé"
 echo "  La CI peut maintenant publier l'extension sur le Marketplace et Open VSX."
-echo "  Secrets enregistrés : $(gh secret list --repo "$REPO" | cut -f1 | tr '\n' ' ')"
+echo "  Secrets de « production » : $(gh secret list --repo "$REPO" --env production | cut -f1 | tr '\n' ' ')"
